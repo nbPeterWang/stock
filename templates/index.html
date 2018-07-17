@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>股票量化交易系统</title>
+    <script src="static/jquery.min.js">
+    </script>
+<script>
+var current_code = "";
+function getreal() {
+    var a = document.getElementById('code').value;
+    $.ajax({
+        type: "GET",
+        url : "/getreal",
+        data: {a},
+        success:function(data){
+            p1 = $("<p>实时股票数据</p><br>");
+            $("#real").append(p1);
+            $("#real").append("<b><br />代码&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;名字&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;市价&nbsp;&nbsp;&nbsp;&nbsp;买价&nbsp;&nbsp;&nbsp;&nbsp;卖价&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;股数&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;市值&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;时间</b><br>");
+            data = JSON.parse(data);
+            for(var p in data){
+            p2 = $("<p></p><br>");
+            p2.text(""+data[p].code + " " +data[p].name+" "+data[p].price+" "+data[p].bid+" "+data[p].ask+" "+data[p].volume+" "+data[p].amount+" "+data[p].time);
+            $("#real").append(p2);
+            $("#real").append("<input type=\"button\" onclick = 'show(\""+data[p].code+"\")' id=\"trade"+p+"\"  value=\"量化交易\" /><br>");
+            }
+        }
+    })
+}
+function show(code1){
+    current_code = code1;
+    if(document.getElementById("xxx").style.display=="none")
+    {document.getElementById("xxx").style.display="block";
+    document.getElementById("yyy").style.display="block";}
+    else{document.getElementById("xxx").style.display="none";
+    document.getElementById("yyy").style.display="none";}
+}
+function myform1() {
+    $.ajax({
+        type: "GET",
+        url : "/myform1",
+        data: {current_code},
+        success:function(data){
+            p1 = $("<p></p><br>");
+            p1.text("预测的收盘价为："+data+"元");
+            $("#xxx").append(p1);
+        }
+    })
+}
+$(document).ready(function(){
+    var all_stats_textareas = $(".textarea_stats");
+            all_stats_textareas.css("width", "150px");
+            all_stats_textareas.css("height", "230px");
+    $(".btn2").click(function(){
+        var b1 = document.getElementById('date').value;
+        $.ajax({
+        type: "GET",
+        url : "/exportdata",
+        data: {b1,current_code},
+        success:function(data){
+            p1 = $("<p></p><br>");
+            p1.text(data);
+            $("#xxx").append(p1);
+        }
+    })	
+	});
+
+    $(".btn3").click(function(){
+        $.ajax({
+        type: "GET",
+        url : "/cleandata",
+        data: {current_code},
+        success:function(data){
+            p1 = $("<p></p><br>");
+            p1.text(data);
+            $("#xxx").append(p1);
+        }
+    })	
+	});
+    $(".btn4").click(function(){
+        $.ajax({
+        type: "GET",
+        url : "/gettac",
+        data: {current_code},
+        success:function(data){
+                    $("#stats_daily").val(data.daily);
+                    $("#stats_id").val(data.id);
+                    $("#stats_on").val(data.on);
+                    $("#stats_own").val(data.own);
+                    $("#stats_").val(data.long);
+                    $("#div_stats").css("display", "");
+        }
+    })	
+	});
+});
+</script>
+</head>
+<body>
+    <h1>股票量化交易系统</h1>
+    <div id="real">
+    <form action="/getreal" method='post'>
+        股票代码: <input type="text" name="code" value="" id="code"><br>
+        <input type="button" onclick = "getreal()" id="set"  value="设置"/>
+    </form><br>
+   </div>
+    <div id="xxx" style="display:none">
+            <form action="/myform1" method='post'>
+                日期: <input type="date" name="date" value="" id="date">
+                <input type="button" onclick = "myform1()" id="pred1"  value="预测"/>
+            </form>
+    <button class="btn2">导出数据</button>
+    <button class="btn3">加工数据</button> <br/>
+    </div>
+    <div id="yyy" style="display:none">
+    <button class="btn4">策略对比</button> 
+    
+        <div style="float: left">
+            <p>交易策略1: 长期持有</p>
+            <textarea id="stats_" class="textarea_stats" title=""></textarea>
+        </div>
+        <div style="float: left">
+            <p>交易策略2: 每日交易</p>
+            <textarea id="stats_daily" class="textarea_stats" title=""></textarea>
+        </div>
+        <div style="float: left">
+            <p>交易策略3: 日间交易</p>
+            <textarea id="stats_id" class="textarea_stats" title=""></textarea>
+        </div>
+        <div style="float: left">
+            <p>交易策略4: 隔夜交易</p>
+            <textarea id="stats_on" class="textarea_stats" title=""></textarea>
+        </div>
+        <div style="float: left">
+            <p>交易策略5: 自定义交易</p>
+            <textarea id="stats_own" class="textarea_stats" title=""></textarea>
+        </div>
+    </div>
+   
+</body>
+</html>
